@@ -3,7 +3,8 @@
 
 namespace app\WebService;
 
-class OpenWeatherMap{
+class OpenWeatherMap
+{
     /**
      * URL BASE DAS APIS
      * @var string
@@ -16,7 +17,8 @@ class OpenWeatherMap{
      */
     private $apiKey;
 
-    public function __construct($apiKey){
+    public function __construct($apiKey)
+    {
         $this->apiKey = $apiKey;
     }
     /**
@@ -26,43 +28,67 @@ class OpenWeatherMap{
      * @return array
      */
 
-    public function consultarClimaAtual($cidade,$uf){
-        return $this->get('/data/2.5/weather',
-    [
-        'q'=> $cidade.',BR-'.$uf.',BRA'
-    ]);
-
+    public function consultarClimaAtual($cidade, $uf)
+    {
+        return $this->get(
+            '/data/2.5/weather',
+            [
+                'q' => $cidade . ',BR-' . $uf . ',BRA'
+            ]
+        );
     }
+
+
+    /**
+     * Método responsavel por obter a previsao do tempo dos dias em uma cidade no Brasil
+     * @param string $cidade
+     * @param string $uf
+     * @return array
+     */
+
+    public function consultarPrevisaoTempo($cidade, $uf)
+    {
+        return $this->get(
+            '/data/2.5/forecast',
+            [
+                'q' => $cidade . ',BR-' . $uf . ',BRA'
+            ]
+        );
+    }
+
+
+
     /**
      * Método responsavel por executar a consulta GET na api do OpenWeatherMap
      * @param string $resource
      * @param array $params
      * @return array
      */
-    private function get($resource,$params = []){
-     //Parâmetros adicionais
-     $params['units'] = 'metric';
-     $params['lang'] = 'pt_br';
-     $params['appid'] = $this->apiKey;
-    
-     //Endpoint
-     $endpoint = self::BASE_URL.$resource.'?'.http_build_query($params);
+    private function get($resource, $params = [])
+    {
+        //Parâmetros adicionais
+        $params['units'] = 'metric';
+        $params['lang'] = 'pt_br';
+        $params['appid'] = $this->apiKey;
 
-     //Inicia o curl
-     $curl = curl_init();
-     //Configurações do Curl
-       curl_setopt_array($curl,[
-         CURLOPT_URL => $endpoint,
-         CURLOPT_RETURNTRANSFER => true,
-         CURLOPT_CUSTOMREQUEST => 'GET'
-     ]);
-     //response
-    $response = curl_exec($curl);
+        //Endpoint
 
-    //Fecha a conexao do Curl
-    curl_close($curl);
-//Response em array
-     return json_decode($response,true);
+        $endpoint = self::BASE_URL . $resource . '?' . http_build_query($params);
+        
+        //Inicia o curl
+        $curl = curl_init();
+
+        //Configurações do Curl
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_URL, $endpoint);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        //response
+        $response = curl_exec($curl);
+
+        //Fecha a conexao do Curl
+        curl_close($curl);
+        //Response em array
+        return json_decode($response, true);
     }
-
 }
